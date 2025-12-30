@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: doctor
+      POSTGRES_PASSWORD: doctor
+      POSTGRES_DB: doctor_appointments
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://doctor:doctor@db:5432/doctor_appointments
+      SECRET_KEY: changeme
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+volumes:
+  postgres_data:
