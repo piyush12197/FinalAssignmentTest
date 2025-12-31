@@ -26,6 +26,9 @@ uvicorn app.main:app --reload
 ```
 The API will be available at `http://localhost:8000`.
 
+> Note: This project targets Pydantic v2; ensure your virtualenv installs the bundled `pydantic-settings` dependency via `pip install -r requirements.txt`.
+> If you upgraded from an older checkout, re-run `pip install -r requirements.txt --upgrade` to ensure `pydantic-settings` is available.
+
 ### Running with Docker Compose (PostgreSQL)
 ```bash
 docker-compose up --build
