@@ -1,4 +1,5 @@
 import { ambulanceFleetStore, ambulanceTripStore, driverStore, emergencyCallStore } from "../../../../_mock/ambulanceCommandStore";
+import { routeOrderToPartner } from "../../../../_mock/partnerStore";
 import { getRequestScope, notify, ok, bad } from "../../../_lib/utils";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
@@ -7,6 +8,15 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   const call = emergencyCallStore.find((x) => x.id === params.id && x.tenantId === tenantId);
   if (!call) return bad("Emergency call not found", 404);
+
+  const externalOrder = routeOrderToPartner(tenantId, "AMBULANCE", call.id);
+  if (externalOrder) {
+    call.status = "DISPATCHED";
+    call.externalProviderTenantId = externalOrder.partner.tenantId;
+    call.timeline.push({ ts: new Date().toISOString(), action: "DISPATCHED", note: `Externally routed to ${externalOrder.partner.name}` });
+    notify(externalOrder.partner.tenantId, "HOSPITAL_ADMIN", `New external ambulance dispatch ${externalOrder.order.id} from ${tenantId}.`);
+    return ok({ call, partnerOrder: externalOrder.order }, "Dispatch routed to external partner");
+  }
 
   const ambulance = ambulanceFleetStore.find((x) => x.id === body.ambulanceId && x.tenantId === tenantId);
   if (!ambulance || ambulance.status !== "AVAILABLE") return bad("Ambulance unavailable");
