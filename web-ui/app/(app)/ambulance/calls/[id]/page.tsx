@@ -1,4 +1,5 @@
 import { ambulanceFleetStore, driverStore, emergencyCallStore } from "../../../../api/platform/v1/_mock/ambulanceCommandStore";
+import { partnerOrganizations } from "../../../../api/platform/v1/_mock/partnerStore";
 
 export default function EmergencyCallDetailPage({ params }: { params: { id: string } }) {
   const call = emergencyCallStore.find((c) => c.id === params.id);
@@ -6,6 +7,7 @@ export default function EmergencyCallDetailPage({ params }: { params: { id: stri
 
   const ambulance = ambulanceFleetStore.find((a) => a.id === call.assignedAmbulanceId);
   const driver = driverStore.find((d) => d.id === call.assignedDriverId);
+  const externalProvider = partnerOrganizations.find((partner) => partner.tenantId === call.externalProviderTenantId);
 
   return (
     <div style={{ padding: 24 }}>
@@ -15,7 +17,8 @@ export default function EmergencyCallDetailPage({ params }: { params: { id: stri
       <p>Condition: {call.conditionSummary}</p>
       <p>Assigned Ambulance: {ambulance ? ambulance.vehicleNumber : "Not assigned"}</p>
       <p>Driver: {driver ? driver.name : "Not assigned"}</p>
-      {!call.assignedAmbulanceId && <button disabled>Dispatch (use command center/API)</button>}
+      <p>External Provider Assigned: {externalProvider ? externalProvider.name : "No"}</p>
+      {!call.assignedAmbulanceId && !call.externalProviderTenantId && <button disabled>Dispatch (use command center/API)</button>}
       <h2>Timeline</h2>
       <ul>{call.timeline.map((t, i) => <li key={`${t.ts}-${i}`}>{t.ts} - {t.action} {t.note ? `(${t.note})` : ""}</li>)}</ul>
     </div>

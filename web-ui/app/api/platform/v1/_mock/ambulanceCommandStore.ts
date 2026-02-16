@@ -52,6 +52,7 @@ export const emergencyCallStore: Array<{
   status: EmergencyStatus;
   assignedAmbulanceId?: string;
   assignedDriverId?: string;
+  externalProviderTenantId?: string;
   patientId?: string;
   timeline: Array<{ ts: string; action: string; note?: string }>;
 }> = [];
